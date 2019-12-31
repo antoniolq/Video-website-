@@ -34,6 +34,6 @@ def comments():
 def loginlog():
     return render_template("/home/loginlog.html")
 
-@home.route("/moviecol/")
-def moviecol():
-    return render_template("/home/moviecol.html")
+@home.route("/animation/")
+def animation():
+    return render_template("/home/animation.html")
