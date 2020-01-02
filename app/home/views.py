@@ -41,3 +41,27 @@ def animation():
 @home.route("/search/")
 def search():
     return render_template("/home/search.html")
+
+@home.route("/moviecol/")
+def moviecol():
+    return render_template("/home/moviecol.html")
+
+@home.route("/play/")
+def play():
+    return render_template("/home/play.html")
+
+@home.route("/tag/add/")
+def tag_add():
+    return render_template("/admin/tag_add.html")
+
+@home.route("/tag/list/")
+def tag_list():
+    return render_template("/admin/tag_list.html")
+
+@home.route("/movie/add/")
+def movie_add():
+    return render_template("/admin/movie_add.html")
+
+@home.route("/movie/list/")
+def movie_list():
+    return render_template("/admin/movie_list.html")
