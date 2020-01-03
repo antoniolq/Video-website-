@@ -50,14 +50,6 @@ def moviecol():
 def play():
     return render_template("/home/play.html")
 
-@home.route("/tag/add/")
-def tag_add():
-    return render_template("/admin/tag_add.html")
-
-@home.route("/tag/list/")
-def tag_list():
-    return render_template("/admin/tag_list.html")
-
 @home.route("/movie/add/")
 def movie_add():
     return render_template("/admin/movie_add.html")
