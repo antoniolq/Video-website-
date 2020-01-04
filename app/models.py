@@ -1,12 +1,7 @@
 import datetime
-from flask_sqlalchemy import SQLAlchemy
+from app import db
 from flask import Flask
-import pymysql
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@127.0.0.1:8889/movie"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
-db = SQLAlchemy(app)
 
 # 定义会员模型
 class User(db.Model):
@@ -186,7 +181,7 @@ class OperateLog(db.Model):
     def __repr__(self):
         return "Operatelog %r" % self.id
 
-
+'''
 if __name__ == '__main__':
     # 创建数据表
     print(db)
@@ -212,3 +207,4 @@ if __name__ == '__main__':
     )
     db.session.add(admin)
     db.session.commit()
+'''
