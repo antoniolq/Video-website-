@@ -1,0 +1,12 @@
+Click==7.0
+Flask
+Flask-SQLAlchemy==2.3.2
+Flask-WTF==0.14.2
+itsdangerous==0.24
+Jinja2
+MarkupSafe==1.0
+mysql-connector
+SQLAlchemy
+Werkzeug==0.14.1
+WTForms==2.2.1
+pymysql
