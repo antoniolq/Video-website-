@@ -1,10 +1,10 @@
 from . import admin
 from flask import render_template,redirect,url_for,flash,session,request
-from app.admin.forms import LoginFrom,TagForm
-from app.admin.forms import LoginFrom,TagForm
-from app.models import Admin,Tag
+from app.admin.forms import LoginFrom,PwdForm
+from app.models import Admin,Tag,User
 from functools import wraps
-from app import db
+from app import db, app
+import os
 
 def admin_login_require(func):
     @wraps(func)
@@ -43,40 +43,21 @@ def logout():
     session.pop('login_admin', None)  # 删除session中的登录账号
     return redirect(url_for("admin.login"))
 
-@admin.route("/pwd/")
+@admin.route("/pwd/", methods=['GET', 'POST'])
 @admin_login_require
 def pwd():
-    return render_template("admin/pwd.html")
-
-@admin.route("/tag/add/",methods=["GET","POST"])
-@admin_login_require
-#TODO
-def tag_add():
-    form = TagForm()
+    form = PwdForm()
     if form.validate_on_submit():
         data = form.data
-        tag = Tag.query.filter_by(name = data["name"]).count()
-        if tag == 1:
-            flash("名称已存在！","err")
-            return redirect(url_for('admin.tag_add'))
-        tag = Tag(
-            name=data["name"]
-        )
-        db.session.add(tag)
-        db.session.commit()
-        flash("添加成功！","ok")
-        redirect(url_for('admin.tag_add'))
-    return render_template("/admin/tag_add.html",form=form)
+        login_name = session['login_admin']
+        admin = Admin.query.filter_by(name=login_name).first()
+        from werkzeug.security import generate_password_hash
+        admin.pwd = generate_password_hash(data['new_pwd'])
+        db.session.commit()  # 提交新密码保存，然后跳转到登录界面
+        flash('密码修改成功，请重新登录！', category='ok')
+        return redirect(url_for('admin.logout'))
+    return render_template('admin/pwd.html', form=form)
 
-@admin.route("/tag/list/<int:page>/", methods=["GET"])
-@admin_login_require
-def tag_list(page=None):
-    if page is None:
-        page = 1
-    page_data = Tag.query.order_by(
-        Tag.add_time.desc()
-    ).paginate(page=page,per_page=10)
-    return render_template("/admin/tag_list.html",page_data=page_data)
 
 @admin.route("/movie/add/")
 @admin_login_require
@@ -98,15 +79,41 @@ def preview_add():
 def preview_list():
     return render_template("/admin/preview_list.html")
 
-@admin.route("/user/list/")
+@admin.route("/user/list/<int:page>/")
 @admin_login_require
-def user_list():
-    return render_template("/admin/user_list.html")
+def user_list(page=None):
+    if page is None:
+        page = 1
+    page_users = User.query.paginate(page=page, per_page=10)
+    return render_template('admin/user_list.html', page_users=page_users)
 
-@admin.route("/user/view/")
+@admin.route("/user/view/<int:user_id>/")
 @admin_login_require
-def user_view():
-    return render_template("/admin/user_view.html")
+def user_view(user_id=None):
+    user = User.query.get_or_404(user_id)
+    return render_template('admin/user_view.html', user=user)
+
+@admin.route("/user/add/")
+@admin_login_require
+def user_add():
+    return render_template('admin/user_add.html')
+
+@admin.route("/user/delete/<int:delete_id>/")
+@admin_login_require
+def user_delete(delete_id=None):
+    user = User.query.get_or_404(delete_id)
+    # 删除同时要从磁盘中删除封面文件
+    file_save_path = app.config['USER_IMAGE']  # 头像上传保存路径
+    # 如果存在将进行删除，不判断，如果文件不存在删除会报错
+    if os.path.exists(os.path.join(file_save_path, user.face)):
+        os.remove(os.path.join(file_save_path, user.face))
+
+    # 删除数据库，提交修改
+    db.session.delete(user)
+    db.session.commit()
+    # 删除后闪现消息
+    flash('删除会员成功！', category='ok')
+    return redirect(url_for('admin.user_list', page=1))
 
 @admin.route("/comment/list/")
 @admin_login_require

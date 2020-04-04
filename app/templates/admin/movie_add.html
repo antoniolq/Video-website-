@@ -1,75 +1,75 @@
 {% extends "admin/admin.html" %}
 
 {% block content %}
-        <section class="content-header">
-            <h1>原型系统</h1>
-            <ol class="breadcrumb">
-                <li><a href="#"><i class="fa fa-dashboard"></i> 监控管理</a></li>
-                <li class="active">人体跟踪</li>
-            </ol>
-        </section>
-        <section class="content" id="showcontent">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="box box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">添加电影</h3>
+<section class="content-header">
+    <h1>原型系统</h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 监控管理</a></li>
+        <li class="active">人体跟踪</li>
+    </ol>
+</section>
+<section class="content" id="showcontent">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">添加电影</h3>
+                </div>
+                <form role="form">
+                    <div class="box-body">
+                        <div class="form-group">
                         </div>
-                        <form role="form">
-                            <div class="box-body">
-                                <div class="form-group">
-                                    <label for="input_title">片名</label>
-                                    <input type="text" class="form-control" id="input_title" placeholder="请输入片名！">
-                                </div>
-                                <div class="form-group">
-                                    <div style="margin-top:5px;">
-                                        <div id="moviecontainer"></div>
+                        <div class="form-group">
+                            <div class="player-wrapper" style="margin:0 auto;width:80%;position:relative;">
+                                <div class="video-wrapper" style="padding-bottom:55%;position:relative;margin:0 auto;">
+                                    <div class="video-inner" style="position:absolute;top:0;bottom:0;left:0;right:0;">
+                                        <video id="videojs" class="video-js vjs-default-skin vjs-big-play-centered"
+                                               style="width: 100%; height: 100%;" controls preload="none"
+                                               poster="" x5-video-player-fullscreen=”true”，x5-video-player-type=”h5”>
+                                            <source src="rtmp://58.200.131.2:1935/livetv/hunantv"
+                                                    type="rtmp/mp4"></source>
+                                            <p class="vjs-no-js">
+                                                To view this video please enable JavaScript, and consider upgrading to a
+                                                web browser that
+                                                <a href="http://videojs.com/html5-video-support/" target="_blank">
+                                                    supports HTML5 video
+                                                </a>
+                                            </p>
+                                        </video>
                                     </div>
                                 </div>
                             </div>
-                            <div class="box-footer">
-                                <button type="submit" class="btn btn-primary">添加</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">添加</button>
+                    </div>
+                </form>
             </div>
-        </section>
+        </div>
+    </div>
+</section>
 {% endblock %}
 {% block js %}
 <!--播放页面-->
-<script src="{{url_for('static',filename='jwplayer/jwplayer.js')}}"></script>
-<script type="text/javascript">
-    jwplayer.key = "P9VTqT/X6TSP4gi/hy1wy23BivBhjdzVjMeOaQ==";
-
-</script>
-<script type="text/javascript">
-    jwplayer("moviecontainer").setup({
-        flashplayer: "{{url_for('static',filename='jwplayer/jwplayer.flash.swf')}}",
-        playlist: [{
-            file: "../static/video/htpy.mp4",
-            title: "环太平洋"
-        }],
-        modes: [{
-            type: "html5"
-        }, {
-            type: "flash",
-            src: "{{url_for('static',filename='jwplayer/jwplayer.flash.swf')}}"
-        }, {
-            type: "download"
-        }],
-        skin: {
-            name: "vapor"
-        },
-        "playlist.position": "left",
-        "playlist.size": 200,
-        height: 250,
-        width: 387,
+<script src="{{ url_for('static',filename = 'admin/plugins/video-js-5.19.2/video.js') }}"></script>
+<script>
+    videojs.options.flash.swf = "{{ url_for('static',filename = 'admin/plugins/video-js-5.19.2/video-js-fixed.swf') }}";
+    videojs.options.techOrder = ['html5', 'flash'];
+    player = videojs("videojs", {
+        notSupportedMessage: '您的浏览器没有安装或开启Flash,戳我开启！',
+        techOrder: ["flash"],
+        autoplay: true
+    });
+    player.on("error", function (e) {
+        var $e = $(".vjs-error .vjs-error-display .vjs-modal-dialog-content");
+        var $a = $("<a href='http://www.adobe.com/go/getflashplayer' target='_blank'></a>").text($e.text());
+        $e.empty().append($a);
     });
 
 </script>
 <script>
-    $(document).ready(function(){
+    $(document).ready(function () {
         $("#g-3").addClass("active");
         $("#g-3-1").addClass("active");
     });
