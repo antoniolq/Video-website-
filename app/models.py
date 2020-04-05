@@ -1,6 +1,16 @@
 import datetime
-from app import db
+import os
+from flask_sqlalchemy import SQLAlchemy
+# from app import db
 from flask import Flask
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@127.0.0.1:3306/movie"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
+app.config['USER_IMAGE'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static/user/')  # 存放用户头像的路径
+
+app.config["SECRET_KEY"] = "543ee8554a184d728183d229c34b8102"
+app.debug = True
+db = SQLAlchemy(app)
 
 
 # 定义会员模型
@@ -19,13 +29,14 @@ class User(db.Model):
     comments = db.relationship('Comment', backref='user')  # 用户评论外键关系关联
     moviecollects = db.relationship('MovieCollect', backref='user')  # 用户收藏电影外键关系关联
 
+
     def __repr__(self):  # 查询的时候返回
         return "<User %r>" % self.name
 
-    def check_pwd(self, pwd):
-        """验证密码是否正确"""
+    def check_pwd(self, input_pwd):
+        """验证密码是否正确，直接将hash密码和输入的密码进行比较，如果相同则，返回True"""
         from werkzeug.security import check_password_hash
-        return check_password_hash(self.pwd, pwd)
+        return check_password_hash(self.pwd, input_pwd)
 
 
 # 会员日志
@@ -161,6 +172,7 @@ class Admin(db.Model):
 class AdminLog(db.Model):
     __tablename__ = "adminlog"
     id = db.Column(db.Integer, primary_key=True)  # 编号
+    name = db.Column(db.String(100))
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))  # 所属管理员
     ip = db.Column(db.String(100))  # 登录IP
     add_time = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 登录时间
@@ -175,36 +187,25 @@ class OperateLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # 编号
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))  # 所属管理员
     ip = db.Column(db.String(100))  # 登录ip
+    name = db.Column(db.String(100))
     reason = db.Column(db.String(600))  # 操作原因
     add_time = db.Column(db.DateTime, index=True, default=datetime.datetime.now)  # 时间
 
     def __repr__(self):
         return "Operatelog %r" % self.id
 
-'''
+
 if __name__ == '__main__':
     # 创建数据表
-    print(db)
+    # print(db)
     #db.create_all()
     #print('创建表')
 
-    # 添加角色
-    role = Role(
-        name="超级管理员",
-        auths="",
-    )
-    db.session.add(role)
-    db.session.commit()
-    print('')
-    # 添加管理员
     from werkzeug.security import generate_password_hash
 
-    admin = Admin(
+    user = User(
         name='admin',
-        pwd=generate_password_hash('flaskadmin'),  # 加密密码
-        is_super=0,
-        role_id=1,
+        pwd=generate_password_hash('admin')  # 加密密码
     )
-    db.session.add(admin)
+    db.session.add(user)
     db.session.commit()
-'''
