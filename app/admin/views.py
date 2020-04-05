@@ -80,17 +80,17 @@ def pwd():
     return render_template('admin/pwd.html', form=form)
 
 
-@admin.route("/movie/add/")
+@admin.route("/video/track/")
 @admin_login_require
-def movie_add():
+def video_track():
     opLogRecord(session['login_admin'], "查看人体跟踪算法效果")
-    return render_template("/admin/movie_add.html")
+    return render_template("/admin/video_track.html")
 
-@admin.route("/movie/list/")
+@admin.route("/video/action/")
 @admin_login_require
-def movie_list():
+def video_action():
     opLogRecord(session['login_admin'], "查看行为识别算法效果")
-    return render_template("/admin/movie_list.html")
+    return render_template("/admin/video_action.html")
 
 
 @admin.route("/user/list/<int:page>/")
