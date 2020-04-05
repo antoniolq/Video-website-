@@ -1,9 +1,9 @@
 from . import admin
 from flask import render_template,redirect,url_for,flash,session,request
 from app.admin.forms import LoginFrom,PwdForm,RegisterForm
-from app.models import Admin,Tag,User,UserLog,AdminLog,OperateLog
+from app.models import User,AdminLog,OperateLog
 from functools import wraps
-from app import db, app
+from app import db
 from werkzeug.security import generate_password_hash
 import datetime
 import uuid
@@ -14,7 +14,6 @@ def admin_login_require(func):
     @wraps(func)
     def decorated_function(*args, **kwargs):
         if session.get('login_admin', None) is None:
-            # 如果session中未找到该键，则用户需要登录
             return redirect(url_for('admin.login', next=request.url))
         return func(*args, **kwargs)
     return decorated_function
@@ -50,10 +49,8 @@ def login():
         data = form.data  # 获取表单的数据
         login_admin = User.query.filter_by(name=data['account']).first()
         if not login_admin.check_pwd(data['pwd']):
-            # 判断密码错误，然后将错误信息返回，使用flash用于消息闪现
             flash('密码错误！')
             return redirect(url_for('admin.login'))
-        # 如果密码正确，session中添加账号记录，然后跳转到request中的next，或者是跳转到后台的首页
         session['login_admin'] = data['account']
         loginLogRecord(data['account'])
         return redirect(request.args.get('next') or url_for('admin.index'))
@@ -74,7 +71,8 @@ def pwd():
         admin = User.query.filter_by(name=login_name).first()
         from werkzeug.security import generate_password_hash
         admin.pwd = generate_password_hash(data['new_pwd'])
-        db.session.commit()  # 提交新密码保存，然后跳转到登录界面
+        db.session.commit()
+        opLogRecord(session['login_admin'], "修改密码")
         flash('密码修改成功，请重新登录！', category='ok')
         return redirect(url_for('admin.logout'))
     return render_template('admin/pwd.html', form=form)
@@ -142,15 +140,10 @@ def oplog_list(page=None):
     ).paginate(page=page, per_page=10)
     return render_template("/admin/oplog_list.html", page_op_logs=page_op_logs)
 
-@admin.route("/adminloginlog/list/")
-@admin_login_require
-def adminloginlog_list():
-    return render_template("/admin/adminloginlog_list.html")
 
 @admin.route("/userloginlog/list/<int:page>/")
 @admin_login_require
 def userloginlog_list(page=None):
-    """会员登录日志"""
     opLogRecord(session['login_admin'], "查看登录日志")
     if not page:
         page = 1
@@ -161,32 +154,6 @@ def userloginlog_list(page=None):
     print(page_user_logs)
     return render_template("/admin/userloginlog_list.html",page_user_logs=page_user_logs)
 
-@admin.route("/role/add/")
-@admin_login_require
-def role_add():
-    return render_template("/admin/role_add.html")
 
-@admin.route("/role/list/")
-@admin_login_require
-def role_list():
-    return render_template("/admin/role_list.html")
 
-@admin.route("/auth/add/")
-@admin_login_require
-def auth_add():
-    return render_template("/admin/auth_add.html")
 
-@admin.route("/auth/list/")
-@admin_login_require
-def auth_list():
-    return render_template("/admin/auth_list.html")
-
-@admin.route("/admin/add/")
-@admin_login_require
-def admin_add():
-    return render_template("/admin/admin_add.html")
-
-@admin.route("/admin/list/")
-@admin_login_require
-def admin_list():
-    return render_template("/admin/admin_list.html")

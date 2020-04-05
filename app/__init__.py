@@ -12,10 +12,8 @@ app.config["SECRET_KEY"] = "543ee8554a184d728183d229c34b8102"
 app.debug = True
 db = SQLAlchemy(app)
 
-from app.home import home as home_blueprint
 from app.admin import admin as admin_blueprint
 
-app.register_blueprint(home_blueprint, url_prefix="/home")
 app.register_blueprint(admin_blueprint, url_prefix="/admin")
 
 @app.errorhandler(404)

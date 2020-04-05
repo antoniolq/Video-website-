@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,SubmitField
 from wtforms.validators import DataRequired, ValidationError
-from app.models import Admin,User
+from app.models import User
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, FileField, SelectMultipleField
 from wtforms.validators import DataRequired, ValidationError, EqualTo, Email, Regexp
@@ -85,7 +85,7 @@ class PwdForm(FlaskForm):
         from flask import session
         old_pwd = field.data
         login_name = session['login_admin']
-        admin = Admin.query.filter_by(name=login_name).first()
+        admin = User.query.filter_by(name=login_name).first()
         if not admin.check_pwd(old_pwd):
             raise ValidationError('旧密码错误！')
 
@@ -155,13 +155,6 @@ class RegisterForm(FlaskForm):
             'placeholder': "请输入重复密码",
             'required': "required"
         }
-    )
-    face = FileField(
-        label='头像',
-        validators=[
-            DataRequired('请上传头像')
-        ],
-        description='头像',
     )
     submit = SubmitField(
         label='添加',
